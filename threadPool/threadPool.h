@@ -27,6 +27,7 @@ typedef struct threadpool
     int busy_thread_num;    /* 干活的线程数 */
     int alive_thread_num;   /* 活着的线程数 */    
     int free_thread_num;    /* 摸鱼的线程数 */
+    int min_thread_num;     /* 最小的线程数 */
     int max_thread_num;     /* 最大的线程数 */
 
     pthread_mutex_t mutex;          /* 锁资源 */
@@ -34,7 +35,8 @@ typedef struct threadpool
     pthread_cond_t queueBusy;     /* 有任务 */
     pthread_cond_t queueFree;    /* 没有任务 */
 
-
+    int exitNum;                /* 关闭的线程数 */
+    int shutdown;               /* 关闭的标志位 */
 } ThreadPool;
 
 
@@ -44,6 +46,10 @@ int threadPoolInit(ThreadPool * pool, int threadMinThread, int threadMaxThreads,
 
 /* 添加任务 */
 int threadPoolAdd(ThreadPool * pool, void * (*func)(void * arg), void * arg);
+
+
+/* 线程池的销毁 */
+int threadPoolDestroy(ThreadPool * pool);
 
 
 #endif //_THREAD_POOL_H__
