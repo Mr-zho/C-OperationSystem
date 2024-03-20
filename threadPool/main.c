@@ -6,7 +6,7 @@
 void * printInfo(void * arg)
 {
     int val = *(int *)arg;
-    sleep(1);
+    sleep(2);
     printf("val = %d\n", val);
 };
 
@@ -18,8 +18,8 @@ int main()
     /* 线程池初始化 */
     threadPoolInit(&pool, 3, 10, 50);
 
-    int nums[100] = { 0 };
-    for (int idx = 1; idx <= 100; idx++)
+    int nums[200] = { 0 };
+    for (int idx = 1; idx <= 200; idx++)
     {
         nums[idx] = idx;
         threadPoolAdd(&pool, printInfo, &nums[idx]);

@@ -39,7 +39,7 @@ static void * thread_worker(void *arg)
             pthread_cond_wait(&pool->queueBusy, &pool->mutex);
 
             /* 判断是不是要销毁线程 */
-            if (pool->exitNum)
+            if (pool->exitNum > 0)
             {
                 /* 离开的线程数减一. */
                 pool->exitNum--;
@@ -47,11 +47,13 @@ static void * thread_worker(void *arg)
                 {
                     pthread_mutex_unlock(&(pool->mutex));
                     
-                    /* 方案1: 清理线程号 */
-                    pthread_exit(NULL);
-
                     /* 活着的线程数减一. */
                     pool->alive_thread_num--;
+
+                    printf("thread id is %ld exit...file:%s, func:%s, lines:%d\n", pthread_self(), __FILE__, __FUNCTION__,__LINE__);
+                
+                    /* 方案1: 清理线程号 */
+                    pthread_exit(NULL);
                 }   
             }
         }
@@ -62,6 +64,8 @@ static void * thread_worker(void *arg)
             pthread_mutex_unlock(&(pool->mutex));
             /* 活着的线程数减一. */
             pool->alive_thread_num--;
+            printf("thread id is %ld exit...file:%s, func:%s, lines:%d\n", pthread_self(), __FILE__, __FUNCTION__,__LINE__);
+
             pthread_exit(NULL);
         }
 
@@ -80,9 +84,11 @@ static void * thread_worker(void *arg)
         pthread_cond_signal(&pool->queueFree);
 
 
+        printf("thread id is %ld start working...\n", pthread_self());
         pthread_mutex_lock(&pool->busyMutex);
         pool->busy_thread_num++;
         pthread_mutex_unlock(&pool->busyMutex);
+
 
         /* 处理任务 */
         newTask.func(newTask.arg);
@@ -90,7 +96,7 @@ static void * thread_worker(void *arg)
         pthread_mutex_lock(&pool->busyMutex);
         pool->busy_thread_num--;
         pthread_mutex_unlock(&pool->busyMutex);
-
+        printf("thread id is %ld end working...\n", pthread_self());
 #if 0   
         /* todo... */
         if (pool->shutdown == 1 && pool->queueSize != 0)
@@ -123,7 +129,7 @@ static void * thread_manage(void *arg)
 
     ThreadPool *pool = (ThreadPool *)arg;
 
-    while (pool->shutdown != 0)
+    while (pool->shutdown != 1)
     {
         sleep(TIME_INTERVAL);
 
@@ -155,6 +161,8 @@ static void * thread_manage(void *arg)
                 if (pool->threadIds[idx] == 0 || !threadIsAlive(pool->threadIds[idx]));
                 {
                     pthread_create(&pool->threadIds[idx], NULL, thread_worker, pool);
+                    printf("thread id is %ld join pool..., file:%s, func:%s, lines:%d\n", pool->threadIds[idx], __FILE__, __FUNCTION__,__LINE__);
+
                     count++;
                     /* 活着的线程数 */
                     pool->alive_thread_num++;
@@ -237,6 +245,10 @@ int threadPoolInit(ThreadPool * pool, int threadMinThread, int threadMaxThreads,
         exit(-1);
     }
 
+    /* 初始化离开的线程数为0. */
+    pool->exitNum = 0;
+    /* 初始化的时候 忙碌的线程数为0. */
+    pool->busy_thread_num = 0;
     pool->alive_thread_num = 0;
     for (int idx = 0; idx < threadMinThread; idx++)
     {
@@ -249,6 +261,11 @@ int threadPoolInit(ThreadPool * pool, int threadMinThread, int threadMaxThreads,
         /* 活着的线程数 */
         pool->alive_thread_num++;
     }
+
+    /* 默认不关闭 */
+    pool->shutdown = 0;
+
+    return ON_SUCCESS;
 }
 
 

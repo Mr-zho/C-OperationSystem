@@ -26,7 +26,6 @@ typedef struct threadpool
     pthread_t managerId;    /* 管理的线程 */
     int busy_thread_num;    /* 干活的线程数 */
     int alive_thread_num;   /* 活着的线程数 */    
-    int free_thread_num;    /* 摸鱼的线程数 */
     int min_thread_num;     /* 最小的线程数 */
     int max_thread_num;     /* 最大的线程数 */
 
