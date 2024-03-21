@@ -124,9 +124,6 @@ static bool threadIsAlive(pthread_t tid)
 /* 任务调度 */
 static void * thread_manage(void *arg)
 {
-    /* 线程分离 */
-    pthread_detach(pthread_self());
-
     ThreadPool *pool = (ThreadPool *)arg;
 
     while (pool->shutdown != 1)
@@ -328,6 +325,9 @@ int threadPoolDestroy(ThreadPool * pool)
     {
         sleep(3);
     }
+
+    /* 回收管理者线程资源 */
+    pthread_join(&(pool->managerId), NULL);
 
 
     /* 释放 锁资源 */
