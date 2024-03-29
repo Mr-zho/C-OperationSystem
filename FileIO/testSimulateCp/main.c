@@ -30,6 +30,7 @@ int main(int argc, const char *argv[])
     if (dstfd == -1)
     {
         perror("dstName open error");
+        close(srcfd);
         return -1;
     }
 

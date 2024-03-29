@@ -327,7 +327,7 @@ int threadPoolDestroy(ThreadPool * pool)
     }
 
     /* 回收管理者线程资源 */
-    pthread_join(&(pool->managerId), NULL);
+    pthread_join((pool->managerId), NULL);
 
 
     /* 释放 锁资源 */
